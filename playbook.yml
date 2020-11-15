@@ -15,9 +15,16 @@
         msg: This is a Virtual Host
       when: ansible_virtualization_role == 'guest' 
       ignore_errors: yes
-
     - name: Debug the ansible_virtualization_role
       debug:
         msg: This is a Physical Host
       when: ansible_virtualization_role == 'host'
       ignore_errors: yes
+    - command: 'lsblk -lno NAME'
+      register: results
+    - name: Create list of block devices
+      set_fact:
+        block_devices: "{{ block_devices|default([]) + [ item ] }}"
+      loop: "{{ results.stdout_lines }}"
+    - debug:
+        var: block_devices
